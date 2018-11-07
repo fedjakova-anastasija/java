@@ -1,0 +1,89 @@
+import java.io.*;
+import java.util.*;
+
+public class TopWords2 {
+
+  public static void main(String[] args) {
+    if (args.length != 2) {
+      System.out.println("Usage input <input file> <number of words>");
+    } else {
+      int countOfPairs = Integer.valueOf(args[1]);
+      String inputFile = args[0];
+      getCountOfWords(inputFile, countOfPairs);
+    }
+
+  }
+
+  public static HashMap<String, Integer> useMapForWords(String word, HashMap<String, Integer> wordMap) {
+    if (wordMap.containsKey(word)) {
+      wordMap.put(word, wordMap.get(word) + 1);
+    } else {
+      wordMap.put(word, 1);
+    }
+    return wordMap;
+  }
+
+  private static HashMap<String, Integer> sortByValue(HashMap<String, Integer> unsortedMap) {
+    List<HashMap.Entry<String, Integer>> list =
+            new LinkedList<>(unsortedMap.entrySet());
+
+    Collections.sort(list, (o1, o2) -> (o2.getValue()).compareTo(o1.getValue()));
+
+    HashMap<String, Integer> sortedMap = new LinkedHashMap<>();
+    for (HashMap.Entry<String, Integer> entry : list) {
+      sortedMap.put(entry.getKey(), entry.getValue());
+    }
+
+    return sortedMap;
+  }
+
+  public static void showWords(HashMap<String, Integer> wordMap, int countOfPairs) {
+    for(Map.Entry e : wordMap.entrySet()){
+      if (countOfPairs == 0) break;
+      System.out.println(e.getKey()+" "+ e.getValue());
+      --countOfPairs;
+    }
+  }
+
+  private static void getCountOfWords(String inputFile, int countOfPairs) {
+    BufferedReader br = null;
+    try {
+      File fileIn = new File(inputFile);
+      br = new BufferedReader(new FileReader(fileIn));
+
+      String word = "";
+      HashMap<String, Integer> wordMap = new HashMap<>();
+      int symbol;
+      while ((symbol = br.read()) != -1) {
+        char ch = (char) symbol;
+        if (Character.isDigit(ch) || Character.isLetter(ch) || ch == '-') {
+          word += ch;
+
+        } else {
+          if (word != ""){
+            wordMap = useMapForWords(word, wordMap);
+          }
+          word = "";
+        }
+      }
+
+      if (word != ""){
+        wordMap = useMapForWords(word, wordMap);
+      }
+
+      wordMap = sortByValue(wordMap);
+      showWords(wordMap,  countOfPairs);
+
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+    } finally {
+      try {
+        if (br != null)
+          br.close();
+      } catch (IOException e) {
+
+        System.out.println(e.getMessage());
+      }
+    }
+  }
+}
